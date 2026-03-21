@@ -2,9 +2,48 @@ import Mathlib
 
 namespace MvPolynomial
 
-theorem totalDegree_pow_eq {R : Type u} {σ : Type u_1} [CommSemiring R] [IsReduced R]
-    (f : MvPolynomial σ R) (n : ℕ) : (f ^ n).totalDegree = n * f.totalDegree := by
-  sorry
+theorem totalDegree_pow_eq {R σ : Type*} [CommSemiring R] [IsReduced R]
+    (p : MvPolynomial σ R) (n : ℕ) : (p ^ n).totalDegree = n * p.totalDegree := by
+  by_cases! p_zero : p = 0
+  · simp [p_zero, zero_pow_eq]
+    split_ifs <;> simp
+  · rw [le_antisymm_iff]
+    constructor
+    · apply totalDegree_pow
+    · have h1 : ∃ m ∈ p.support, (m.sum fun (x : σ) (e : ℕ) => e) = p.totalDegree := by
+        unfold totalDegree
+        conv => 
+          right
+          intro m1
+          right
+          rw [eq_comm]
+        exact Finset.exists_mem_eq_sup p.support (by simp [p_zero])
+          (fun m => (m.sum fun (x : σ) (e : ℕ) => e))
+      obtain ⟨m, ⟨hm_sup, hm_deg⟩⟩ := h1
+
+      by_cases! one_zero : (1 : R) = 0
+      · have hr : ∀ r : R, r = 0 := by
+          intro r
+          rw [← one_mul r, one_zero, zero_mul]
+        have hp : p = 0 := by
+          simp [MvPolynomial.ext_iff, hr]
+        simp [hp]
+      · let mn : (σ →₀ ℕ) := n • m
+        have h2 : mn ∈ (p ^ n).support := by
+          induction n
+          · unfold mn
+            simp only [pow_zero, zero_nsmul, mem_support_iff, coeff_zero_one]
+            exact one_zero
+          · 
+
+
+            sorry
+
+
+
+        sorry
+
+
 
 end MvPolynomial
 
@@ -21,7 +60,7 @@ lemma motzkin_ne_sos {ι : Type*} (s : Finset ι) (g : ι → MvPolynomial (Fin 
     motzkin ≠ ∑ i ∈ s, g i ^ 2 := by
   by_contra! motzkin_sos
 
-  have total_degree_le_3 {i : ι} (hi : i ∈ s) (m : _) (hm : (g i).coeff m ≠ 0) : m 0 + m 1 ≤ 3 := by
+  have totalDegree_le_3 {i : ι} (hi : i ∈ s) (m : _) (hm : (g i).coeff m ≠ 0) : m 0 + m 1 ≤ 3 := by
     rw [← mem_support_iff] at hm
     revert m
     rw [← Finset.sup_le_iff]
